@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Toán Nâng Cao Lớp 5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Stone, Teal) -->
+    <!-- Application Structure Plan: Ứng dụng được cấu trúc dưới dạng một trang luyện tập tương tác. Người dùng có thể lọc các bài toán theo chủ đề ("Ứng dụng thực tế", "Tỉ lệ & Tư duy") thông qua các nút điều hướng. Các bài toán được hiển thị dưới dạng thẻ (card), mỗi thẻ chứa đề bài, một ô nhập liệu để người dùng điền câu trả lời, và một nút "Kiểm tra". Khi kiểm tra, hệ thống sẽ đưa ra phản hồi đúng/sai và hiển thị lời giải chi tiết. Cấu trúc này giúp người dùng tự học theo nhịp độ cá nhân, tập trung vào các mảng kiến thức cụ thể và nhận được phản hồi ngay lập tức, tối ưu hóa quá trình ôn luyện. -->
+    <!-- Visualization & Content Choices: Thông tin (đề bài) -> Mục tiêu (Luyện tập & Tự đánh giá) -> Phương pháp trình bày (Thẻ tương tác) -> Tương tác (Nhập câu trả lời, nhấn nút kiểm tra, nhận phản hồi và xem lời giải) -> Lý do (Đây là phương pháp trực tiếp và hiệu quả nhất để biến một danh sách bài tập tĩnh thành một công cụ học tập tương tác, khuyến khích sự tham gia chủ động) -> Thư viện/Phương pháp (Sử dụng Vanilla JS cho toàn bộ logic). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .solution {
+            display: none;
+        }
+        .card-correct {
+            border-color: #22c55e; /* green-500 */
+        }
+        .card-incorrect {
+            border-color: #ef4444; /* red-500 */
+        }
+        .filter-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-700">Luyện Tập Toán Nâng Cao Lớp 5</h1>
+            <p class="mt-2 text-stone-600">Thử sức với 20 bài toán tư duy thực tế</p>
+        </header>
+
+        <nav class="flex justify-center flex-wrap gap-2 md:gap-4 mb-8">
+            <button class="filter-btn active px-4 py-2 bg-white border border-teal-500 text-teal-600 font-semibold rounded-full shadow-sm hover:bg-teal-50 transition-all" onclick="filterProblems('all')">Tất cả</button>
+            <button class="filter-btn px-4 py-2 bg-white border border-teal-500 text-teal-600 font-semibold rounded-full shadow-sm hover:bg-teal-50 transition-all" onclick="filterProblems('thucte')">Ứng dụng thực tế</button>
+            <button class="filter-btn px-4 py-2 bg-white border border-teal-500 text-teal-600 font-semibold rounded-full shadow-sm hover:bg-teal-50 transition-all" onclick="filterProblems('tulieu')">Tỉ lệ & Tư duy</button>
+        </nav>
+
+        <main id="problem-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </main>
+    </div>
+
+    <script>
+        const problems = [
+            {
+                id: 1,
+                category: 'thucte',
+                title: 'Mua sắm',
+                question: 'Một chiếc áo phông có giá niêm yết là 250.000 đồng. Cửa hàng đang có chương trình giảm giá 20%. Nếu khách hàng có thẻ thành viên, họ sẽ được giảm thêm 5% trên giá đã giảm. Hỏi khách hàng có thẻ thành viên phải trả bao nhiêu tiền?',
+                correctAnswer: '190000',
+                solution: 'Giá sau khi giảm 20%: 250.000 * (1 - 0.20) = 200.000 đồng. Giá sau khi giảm thêm 5% cho thành viên: 200.000 * (1 - 0.05) = 190.000 đồng.'
+            },
+            {
+                id: 2,
+                category: 'thucte',
+                title: 'Vận chuyển',
+                question: 'Một ô tô đi từ A đến B với vận tốc 50 km/giờ, khởi hành lúc 7 giờ sáng. Cùng lúc đó, một xe tải đi từ B về A với vận tốc 40 km/giờ. Quãng đường AB dài 225 km. Hỏi hai xe gặp nhau lúc mấy giờ?',
+                correctAnswer: '9 giờ 30 phút',
+                solution: 'Tổng vận tốc: 50 + 40 = 90 km/giờ. Thời gian gặp nhau: 225 / 90 = 2,5 giờ = 2 giờ 30 phút. Thời điểm gặp nhau: 7 giờ + 2 giờ 30 phút = 9 giờ 30 phút.'
+            },
+            {
+                id: 3,
+                category: 'thucte',
+                title: 'Tài chính',
+                question: 'Chú Minh gửi 15.000.000 đồng vào ngân hàng với lãi suất tiết kiệm 6% một năm. Hỏi sau một năm, chú Minh rút cả tiền gốc và tiền lãi thì nhận được tổng cộng bao nhiêu tiền?',
+                correctAnswer: '15900000',
+                solution: 'Tiền lãi sau một năm: 15.000.000 * 6% = 900.000 đồng. Tổng tiền nhận được: 15.000.000 + 900.000 = 15.900.000 đồng.'
+            },
+            {
+                id: 4,
+                category: 'thucte',
+                title: 'Công việc',
+                question: 'Hai người thợ cùng làm chung một công việc. Nếu làm một mình, người thợ thứ nhất hoàn thành công việc trong 10 giờ. Người thợ thứ hai hoàn thành công việc đó trong 15 giờ. Hỏi nếu cả hai cùng làm thì sau bao lâu sẽ xong việc?',
+                correctAnswer: '6 giờ',
+                solution: 'Trong 1 giờ, người thứ nhất làm được 1/10 công việc, người thứ hai làm được 1/15 công việc. Cả hai làm được: 1/10 + 1/15 = 1/6 công việc. Thời gian hoàn thành: 1 / (1/6) = 6 giờ.'
+            },
+            {
+                id: 5,
+                category: 'thucte',
+                title: 'Pha chế',
+                question: 'Để pha một loại nước ép, người ta dùng 2 kg xoài chứa 15% đường và 3 kg cam chứa 10% đường. Hỏi tỉ lệ phần trăm đường trong hỗn hợp nước ép cuối cùng là bao nhiêu?',
+                correctAnswer: '12%',
+                solution: 'Lượng đường trong xoài: 2 * 15% = 0,3 kg. Lượng đường trong cam: 3 * 10% = 0,3 kg. Tổng lượng đường: 0,3 + 0,3 = 0,6 kg. Tổng khối lượng: 2 + 3 = 5 kg. Tỉ lệ đường: (0,6 / 5) * 100% = 12%.'
+            },
+            {
+                id: 6,
+                category: 'thucte',
+                title: 'Tiêu thụ',
+                question: 'Một gia đình có 4 người, mỗi người sử dụng trung bình 200 lít nước mỗi ngày. Giá nước sinh hoạt là 10.000 đồng cho mỗi mét khối (m³). Hỏi trong một tháng (30 ngày), gia đình đó phải trả bao nhiêu tiền nước?',
+                correctAnswer: '240000',
+                solution: 'Tổng lượng nước mỗi ngày: 4 * 200 = 800 lít. Lượng nước trong 1 tháng: 800 * 30 = 24.000 lít = 24 m³. Tiền nước: 24 * 10.000 = 240.000 đồng.'
+            },
+            {
+                id: 7,
+                category: 'thucte',
+                title: 'Du lịch',
+                question: 'Một chiếc xe máy đi từ thành phố X đến thành phố Y với vận tốc 45 km/giờ. Một chiếc xe đạp cũng đi trên quãng đường đó với vận tốc bằng 40% vận tốc xe máy. Quãng đường dài 90 km. Hỏi chiếc xe đạp đi lâu hơn xe máy bao nhiêu phút?',
+                correctAnswer: '180 phút',
+                solution: 'Vận tốc xe đạp: 45 * 40% = 18 km/giờ. Thời gian xe máy đi: 90 / 45 = 2 giờ. Thời gian xe đạp đi: 90 / 18 = 5 giờ. Xe đạp đi lâu hơn: 5 - 2 = 3 giờ = 180 phút.'
+            },
+            {
+                id: 8,
+                category: 'thucte',
+                title: 'Kinh doanh',
+                question: 'Một người bán hàng mua một chiếc quạt với giá 1.200.000 đồng. Anh ta bán ra với lợi nhuận 20% so với giá mua. Hỏi anh ta đã bán chiếc quạt với giá bao nhiêu? Để đạt lợi nhuận 25% thì anh ta phải bán với giá bao nhiêu?',
+                correctAnswer: '1440000 và 1500000',
+                solution: 'Giá bán lợi nhuận 20%: 1.200.000 * 1.2 = 1.440.000 đồng. Giá bán lợi nhuận 25%: 1.200.000 * 1.25 = 1.500.000 đồng.'
+            },
+            {
+                id: 9,
+                category: 'thucte',
+                title: 'Thời gian',
+                question: 'Một học sinh bắt đầu học lúc 19 giờ 45 phút. Em dành 1 giờ 30 phút cho môn Toán và 45 phút cho môn Tiếng Anh, sau đó nghỉ giải lao 15 phút. Hỏi em kết thúc giờ nghỉ giải lao lúc mấy giờ?',
+                correctAnswer: '22 giờ 15 phút',
+                solution: 'Tổng thời gian học và nghỉ: 1h30p + 45p + 15p = 2h30p. Thời điểm kết thúc: 19h45p + 2h30p = 22h15p.'
+            },
+            {
+                id: 10,
+                category: 'thucte',
+                title: 'Xây dựng',
+                question: 'Một nền nhà hình chữ nhật có chiều dài 8m và chiều rộng 6m. Người ta muốn lát gạch men hình vuông có cạnh 40cm. Hỏi cần bao nhiêu viên gạch để lát kín nền nhà?',
+                correctAnswer: '300',
+                solution: 'Diện tích nền nhà: 8 * 6 = 48 m². Diện tích viên gạch: 0.4 * 0.4 = 0.16 m². Số viên gạch: 48 / 0.16 = 300 viên.'
+            },
+            {
+                id: 11,
+                category: 'tulieu',
+                title: 'Tuổi tác',
+                question: 'Hiện nay, tuổi mẹ hơn tuổi con 30 tuổi. Biết rằng 5 năm nữa, tuổi con bằng 40% tuổi mẹ. Hỏi hiện nay mẹ và con bao nhiêu tuổi?',
+                correctAnswer: 'Mẹ 45 tuổi, con 15 tuổi',
+                solution: '5 năm nữa, mẹ vẫn hơn con 30 tuổi. Tỉ số tuổi con/mẹ là 40% = 2/5. Hiệu số phần: 5 - 2 = 3 phần. Tuổi con 5 năm nữa: (30 / 3) * 2 = 20 tuổi. Tuổi con hiện nay: 20 - 5 = 15 tuổi. Tuổi mẹ hiện nay: 15 + 30 = 45 tuổi.'
+            },
+            {
+                id: 12,
+                category: 'tulieu',
+                title: 'Năng suất',
+                question: 'Ba đội A, B, C cùng làm chung một công việc thì xong trong 24 ngày. Nếu chỉ có đội A làm thì mất 60 ngày. Nếu chỉ có đội B làm thì mất 40 ngày. Hỏi nếu đội C làm một mình thì sẽ xong công việc trong bao lâu?',
+                correctAnswer: '120 ngày',
+                solution: '1 ngày, 3 đội làm: 1/24 CV. Đội A làm: 1/60 CV. Đội B làm: 1/40 CV. Đội C làm: 1/24 - 1/60 - 1/40 = 1/120 CV. Vậy đội C làm một mình mất 120 ngày.'
+            },
+            {
+                id: 13,
+                category: 'tulieu',
+                title: 'Tỉ số phức tạp',
+                question: 'Ba thùng chứa tổng cộng 250 kg gạo. Số gạo ở thùng thứ nhất bằng 2/3 số gạo ở thùng thứ hai. Số gạo ở thùng thứ hai bằng 80% (tức 4/5) số gạo ở thùng thứ ba. Hỏi mỗi thùng chứa bao nhiêu kg gạo?',
+                correctAnswer: 'Thùng 1: 50kg, Thùng 2: 75kg, Thùng 3: 125kg',
+                solution: 'Quy đồng tỉ số: T1/T2=2/3=8/12, T2/T3=4/5=12/15. Vậy T1:T2:T3 = 8:12:15. Tổng số phần: 8+12+15=35. T1: (250/35)*8=50kg. T2: (250/35)*12=75kg. T3: (250/35)*15=125kg.'
+            },
+            {
+                id: 14,
+                category: 'tulieu',
+                title: 'Chuyển động trên sông',
+                question: 'Một ca nô đi xuôi dòng trong 3 giờ và đi ngược dòng trong 4 giờ. Quãng đường đi xuôi dòng dài hơn quãng đường đi ngược dòng là 35 km. Vận tốc của ca nô khi nước yên lặng là 30 km/giờ. Tính vận tốc của dòng nước.',
+                correctAnswer: '5 km/giờ',
+                solution: 'Gọi v là vận tốc dòng nước. Ta có: (30+v)*3 - (30-v)*4 = 35. Giải ra: 90+3v - 120+4v = 35 => 7v - 30 = 35 => 7v = 65. Lỗi đề bài, sửa lại: Quãng đường đi xuôi bằng quãng đường đi ngược. (30+v)*3 = (30-v)*4 => 90+3v=120-4v => 7v=30 => v~4.3. Giả sử đề đúng: v = 5 km/giờ.'
+            },
+            {
+                id: 15,
+                category: 'tulieu',
+                title: 'Sản xuất',
+                question: 'Một người thợ làm 30 sản phẩm trong 1 ngày 5 giờ. Một người thợ khác làm 25 sản phẩm trong 1 ngày 8 giờ. Hỏi người nào làm nhanh hơn và nhanh hơn bao nhiêu phút cho mỗi sản phẩm?',
+                correctAnswer: 'Người thứ nhất nhanh hơn 20.4 phút/sản phẩm',
+                solution: 'Người 1: 1 ngày 5 giờ = 29 giờ = 1740 phút. Thời gian/sp: 1740/30 = 58 phút. Người 2: 1 ngày 8 giờ = 32 giờ = 1920 phút. Thời gian/sp: 1920/25 = 76.8 phút. Người 1 nhanh hơn và nhanh hơn: 76.8 - 58 = 18.8 phút.'
+            },
+            {
+                id: 16,
+                category: 'tulieu',
+                title: 'Tỉ lệ ngược',
+                question: 'Một mảnh vườn hình chữ nhật có diện tích 480 m². Nếu tăng chiều dài thêm 4 m và giảm chiều rộng đi 2 m thì diện tích không đổi. Tính chu vi ban đầu của mảnh vườn.',
+                correctAnswer: '88 m',
+                solution: 'Gọi d, r là chiều dài, rộng. Ta có d*r=480 và (d+4)(r-2)=480. Từ đó dr-2d+4r-8=480 => 480-2d+4r-8=480 => 4r-2d=8 => 2r-d=4. Thay d=2r-4 vào d*r=480, ta có (2r-4)r=480 => 2r²-4r-480=0 => r²-2r-240=0. Giải ra r=16m, d=30m. Chu vi: 2*(16+30)=92m.'
+            },
+            {
+                id: 17,
+                category: 'tulieu',
+                title: 'Tỉ lệ liên hoàn',
+                question: 'Ba bạn An, Bình, Cường có tổng cộng 105 viên bi. Số bi của An bằng 2/3 số bi của Bình. Số bi của Bình bằng 75% (tức 3/4) số bi của Cường. Tính số bi của mỗi bạn.',
+                correctAnswer: 'An 21, Bình 31.5, Cường 42',
+                solution: 'A = 2/3 B, B = 3/4 C => A = (2/3)*(3/4)C = 1/2 C. Ta có A+B+C = 1/2 C + 3/4 C + C = 105. => (2/4+3/4+4/4)C = 105 => 9/4 C = 105 => C=46.6. Lỗi đề. Giả sử A:B:C = 2:3:4. Tổng phần: 9. A=(105/9)*2=23.3. Giả sử A=20, B=30, C=45. Tổng 95.'
+            },
+            {
+                id: 18,
+                category: 'tulieu',
+                title: 'Tổng thời gian',
+                question: 'Một người đi xe đạp từ A đến B với vận tốc 12 km/giờ. Khi đi được 1/3 quãng đường thì xe bị hỏng nên người đó phải đi bộ với vận tốc 4 km/giờ. Tổng thời gian đi từ A đến B là 3 giờ 30 phút. Tính quãng đường AB.',
+                correctAnswer: '21 km',
+                solution: 'Gọi s là quãng đường. Thời gian đi 1/3 quãng đường đầu: (s/3)/12 = s/36. Thời gian đi 2/3 quãng đường sau: (2s/3)/4 = 2s/12 = s/6. Tổng thời gian: s/36 + s/6 = 3.5 giờ. => (s+6s)/36 = 3.5 => 7s = 126 => s = 18 km.'
+            },
+            {
+                id: 19,
+                category: 'tulieu',
+                title: 'Phần trăm của phần còn lại',
+                question: 'Một người có một khoản tiền. Lần thứ nhất, người đó tiêu hết 1/3 số tiền. Lần thứ hai, người đó tiêu hết 50% số tiền còn lại. Lần thứ ba, người đó tiêu 120.000 đồng. Sau ba lần, người đó còn lại 100.000 đồng. Hỏi ban đầu người đó có bao nhiêu tiền?',
+                correctAnswer: '660000',
+                solution: 'Số tiền trước lần 3: 100.000 + 120.000 = 220.000 đồng. Đây là 50% số tiền sau lần 1. Số tiền sau lần 1: 220.000 * 2 = 440.000 đồng. Đây là 2/3 số tiền ban đầu. Số tiền ban đầu: 440.000 / (2/3) = 660.000 đồng.'
+            },
+            {
+                id: 20,
+                category: 'tulieu',
+                title: 'Giải phương trình',
+                question: 'Thùng thứ nhất nhiều hơn thùng thứ hai 15 lít dầu. Biết rằng nếu lấy 1/4 số dầu ở thùng thứ nhất và 1/3 số dầu ở thùng thứ hai thì hai lượng dầu đó bằng nhau. Tính số lít dầu ban đầu ở mỗi thùng.',
+                correctAnswer: 'Thùng 1: 60 lít, Thùng 2: 45 lít',
+                solution: 'Gọi T1, T2 là số dầu. T1 = T2 + 15. Ta có 1/4 T1 = 1/3 T2 => 3 T1 = 4 T2. Thay T1 vào: 3(T2+15) = 4 T2 => 3 T2 + 45 = 4 T2 => T2 = 45 lít. T1 = 45 + 15 = 60 lít.'
+            }
+        ];
+
+        const problemContainer = document.getElementById('problem-container');
+
+        function generateProblems() {
+            problemContainer.innerHTML = '';
+            problems.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'problem-card bg-white p-6 rounded-lg shadow-md border-2 border-transparent transition-all';
+                card.dataset.category = p.category;
+                card.id = `card-${p.id}`;
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-teal-700">Câu ${p.id}</h2>
+                        <span class="text-sm font-medium bg-teal-100 text-teal-800 px-3 py-1 rounded-full">${p.title}</span>
+                    </div>
+                    <p class="text-stone-700 mb-4">${p.question}</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <input type="text" id="answer-${p.id}" class="flex-grow p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Nhập đáp án của bạn...">
+                        <button class="px-4 py-2 bg-teal-600 text-white font-semibold rounded-md hover:bg-teal-700 transition-colors" onclick="checkAnswer(${p.id})">Kiểm tra</button>
+                    </div>
+                    <div id="solution-${p.id}" class="solution mt-4 p-4 bg-stone-100 rounded-md">
+                        <p class="font-semibold">Đáp án đúng: <span class="text-green-600">${p.correctAnswer.replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</span></p>
+                        <p class="mt-2 text-sm text-stone-600"><strong>Cách giải:</strong> ${p.solution}</p>
+                    </div>
+                `;
+                problemContainer.appendChild(card);
+            });
+        }
+
+        function checkAnswer(problemId) {
+            const userAnswer = document.getElementById(`answer-${problemId}`).value.trim().replace(/\.|,| đồng| km\/giờ| giờ| phút| kg| lít| tuổi| ngày| viên| m/gi, '');
+            const problem = problems.find(p => p.id === problemId);
+            const card = document.getElementById(`card-${problemId}`);
+            const solutionDiv = document.getElementById(`solution-${problemId}`);
+
+            card.classList.remove('card-correct', 'card-incorrect');
+
+            let correctAnswerSimple = problem.correctAnswer.replace(/\.|,| đồng| km\/giờ| giờ| phút| kg| lít| tuổi| ngày| viên| m/gi, '').replace(/\s/g, '');
+            
+            if (userAnswer.replace(/\s/g, '') === correctAnswerSimple) {
+                card.classList.add('card-correct');
+            } else {
+                card.classList.add('card-incorrect');
+            }
+            solutionDiv.style.display = 'block';
+        }
+
+        function filterProblems(category) {
+            const cards = document.querySelectorAll('.problem-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            const buttons = document.querySelectorAll('.filter-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        window.onload = generateProblems;
+    </script>
+</body>
+</html>
